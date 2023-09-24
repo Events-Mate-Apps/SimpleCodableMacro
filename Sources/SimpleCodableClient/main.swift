@@ -1,8 +1,22 @@
+import Foundation
 import SimpleCodable
 
-let a = 17
-let b = 25
+@Codable
+class MyClass {
+    let myName: String
+    let myAge: Int
+    let myId: UUID
+    let state: States
+    
+    internal init(myName: String, myAge: Int, myId: UUID, state: States) {
+        self.myName = myName
+        self.myAge = myAge
+        self.myId = myId
+        self.state = state
+    }
+}
 
-let (result, code) = #stringify(a + b)
-
-print("The value \(result) was produced by the code \"\(code)\"")
+enum States: Int, Codable {
+    case old
+    case yung
+}
