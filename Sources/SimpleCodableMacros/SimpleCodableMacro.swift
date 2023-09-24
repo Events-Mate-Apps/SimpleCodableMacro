@@ -37,15 +37,24 @@ public struct CodableMacro: MemberMacro {
         var text = "let container = try decoder.container(keyedBy: CodingKeys.self)\n"
         for binding in bindings {
             guard
-                let pattern = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text,
-                let typeAnnotation = binding.typeAnnotation?.as(TypeAnnotationSyntax.self)?.type.as(IdentifierTypeSyntax.self)?.name.text
+                let pattern = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text
             else {
                 continue
             }
-        let toReturn = """
-            self.\(pattern) = try container.decode(\(typeAnnotation).self, forKey: .\(pattern))\n
-        """
-            text.append(toReturn)
+            // Support for Optional
+            if let typeAnnotation = binding.typeAnnotation?.as(TypeAnnotationSyntax.self)?.type.as(IdentifierTypeSyntax.self)?.name.text {
+                // Non optional value
+                let toReturn = """
+                    self.\(pattern) = try container.decode(\(typeAnnotation).self, forKey: .\(pattern))\n
+                """
+                    text.append(toReturn)
+            } else if let typeAnnotation = binding.typeAnnotation?.as(TypeAnnotationSyntax.self)?.type.as(OptionalTypeSyntax.self)?.wrappedType.as(IdentifierTypeSyntax.self)?.name.text {
+                // Optional value
+                let toReturn = """
+                    self.\(pattern) = try container.decodeIfPresent(\(typeAnnotation).self, forKey: .\(pattern))\n
+                """
+                    text.append(toReturn)
+            }
         }
         
         let decoderInitializer = try InitializerDeclSyntax("public required init(from decoder: Decoder) throws") {
@@ -54,7 +63,6 @@ public struct CodableMacro: MemberMacro {
         
         var encoder = "var container = encoder.container(keyedBy: CodingKeys.self)\n"
         for binding in bindings {
-            //        self.code = try container.decode(String.self, forKey: .code)
             guard
                 let pattern = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text
             else {

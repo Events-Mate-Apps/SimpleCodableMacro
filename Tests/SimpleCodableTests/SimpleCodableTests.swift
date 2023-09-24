@@ -15,6 +15,7 @@ final class SimpleCodableTest: XCTestCase {
             class MyClass {
                 let myName: String
                 let myAge: Int
+                let myCrush: String?
                 let myId: UUID
                 let state: States
             }
@@ -23,12 +24,14 @@ final class SimpleCodableTest: XCTestCase {
             class MyClass {
                 let myName: String
                 let myAge: Int
+                let myCrush: String?
                 let myId: UUID
                 let state: States
 
                 enum CodingKeys: String, CodingKey {
                     case myName
                     case myAge
+                    case myCrush
                     case myId
                     case state
                 }
@@ -37,6 +40,7 @@ final class SimpleCodableTest: XCTestCase {
                     let container = try decoder.container(keyedBy: CodingKeys.self)
                     self.myName = try container.decode(String.self, forKey: .myName)
                     self.myAge = try container.decode(Int.self, forKey: .myAge)
+                    self.myCrush = try container.decodeIfPresent(String.self, forKey: .myCrush)
                     self.myId = try container.decode(UUID.self, forKey: .myId)
                     self.state = try container.decode(States.self, forKey: .state)
                 }
@@ -45,6 +49,7 @@ final class SimpleCodableTest: XCTestCase {
                     var container = encoder.container(keyedBy: CodingKeys.self)
                     try container.encode(myName, forKey: .myName)
                     try container.encode(myAge, forKey: .myAge)
+                    try container.encode(myCrush, forKey: .myCrush)
                     try container.encode(myId, forKey: .myId)
                     try container.encode(state, forKey: .state)
                 }
