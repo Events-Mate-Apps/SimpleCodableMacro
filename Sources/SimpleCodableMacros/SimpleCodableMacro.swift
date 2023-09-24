@@ -59,7 +59,7 @@ public struct CodableMacro: MemberMacro {
                 /// Array Value
                 /// Decoding array. If the key doesn't exist, it will be set to an empty array
                 let toReturn = """
-                    self.\(pattern) = (try container.decode([\(typeAnnotation)].self, forKey: .\(pattern))) ?? []\n
+                    self.\(pattern) = try container.decode([\(typeAnnotation)].self, forKey: .\(pattern))\n
                 """
                     text.append(toReturn)
             } else if let typeAnnotation = type.as(OptionalTypeSyntax.self)?.wrappedType.as(ArrayTypeSyntax.self)?.element.as(IdentifierTypeSyntax.self)?.name.text {

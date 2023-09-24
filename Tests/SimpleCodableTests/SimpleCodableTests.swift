@@ -47,7 +47,7 @@ final class SimpleCodableTest: XCTestCase {
                     self.myName = try container.decode(String.self, forKey: .myName)
                     self.myAge = try container.decode(Int.self, forKey: .myAge)
                     self.myCrush = try container.decodeIfPresent(String.self, forKey: .myCrush)
-                    self.favoriteCountries = (try container.decode([String].self, forKey: .favoriteCountries)) ?? []
+                    self.favoriteCountries = try container.decode([String].self, forKey: .favoriteCountries)
                     self.inLoveWith = try container.decodeIfPresent([String].self, forKey: .inLoveWith)
                     self.myId = try container.decode(UUID.self, forKey: .myId)
                     self.state = try container.decode(States.self, forKey: .state)
