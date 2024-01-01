@@ -5,7 +5,27 @@ import SwiftSyntaxMacros
 import SwiftDiagnostics
 
 /// Implementation of the `Codable` macro.
-public struct CodableMacro: MemberMacro {
+public struct CodableMacro: MemberMacro, ExtensionMacro {
+    
+    public static func expansion(
+        of node: SwiftSyntax.AttributeSyntax,
+        attachedTo declaration: some SwiftSyntax.DeclGroupSyntax,
+        providingExtensionsOf type: some SwiftSyntax.TypeSyntaxProtocol,
+        conformingTo protocols: [SwiftSyntax.TypeSyntax],
+        in context: some SwiftSyntaxMacros.MacroExpansionContext
+    ) throws -> [SwiftSyntax.ExtensionDeclSyntax] {
+        
+        /// Already conforms to Codable
+        if protocols.isEmpty {
+            return []
+        }
+        
+        /// Creates an extension to automatically add Protocol Conformance to the class
+        let codableExtension = try ExtensionDeclSyntax("extension \(type.trimmed): Codable {}")
+        
+        return [codableExtension]
+    }
+    
     public static func expansion(
         of attribute: AttributeSyntax,
         providingMembersOf declaration: some DeclGroupSyntax,
@@ -21,7 +41,7 @@ public struct CodableMacro: MemberMacro {
         }
         let members = classDecl.memberBlock.members
         let variableDecls = members.compactMap { $0.decl.as(VariableDeclSyntax.self) }
-        let bindings = variableDecls.flatMap { $0.bindings }
+        let bindings = variableDecls.flatMap { $0.bindings }.filter( {$0.accessorBlock == nil}) //also removes computed properties from bindings
         let patterns = bindings.compactMap {$0.pattern.as(IdentifierPatternSyntax.self) }
         
         let clause = InheritanceClauseSyntax {
